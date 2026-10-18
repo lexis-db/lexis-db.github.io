@@ -1,0 +1,577 @@
+<!DOCTYPE html><html lang="en"><head>
+<script>globalThis.__yaw_hydrate=true;</script>
+<link rel="modulepreload" href="/assets/gssb/.js">
+<link rel="modulepreload" href="/assets/gssb/overview.js">
+<link rel="modulepreload" href="/assets/gssb/install.js">
+<link rel="modulepreload" href="/assets/gssb/examples.js">
+    <meta charset="UTF-8">
+    <title>Lexis: distributed data, in key order</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="Lexis is a distributed database with byte-ordered partitioning on tablets. Prefix and range queries over partition keys become range reads.">
+    <link rel="icon" type="image/svg+xml" href="/lexis-icon-muted.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&amp;family=Ubuntu+Mono:wght@400;700&amp;display=swap">
+    <style>html, body { margin: 0; background: #1f0a24; }</style>
+  <script type="module" crossorigin="" src="/assets/index-CCt8XNla.js"></script>
+  <link rel="modulepreload" crossorigin="" href="/assets/blob-CbDcr2Fw.js">
+  <link rel="modulepreload" crossorigin="" href="/assets/lexis-logo.component-BxhodInO.js">
+  <link rel="modulepreload" crossorigin="" href="/assets/toc-menu.service-DU5C2wki.js">
+  <link rel="modulepreload" crossorigin="" href="/assets/map-DVfgpDne.js">
+<link rel="modulepreload" as="script" crossorigin="" href="/assets/home-page-BHyNCiRg.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/site-footer.component-BGYMMwMu.js"><style id="yaw-ssg-styles">lexis-logo { display: inline-block; line-height: 0; }
+lexis-logo svg { width: 100%; height: auto; display: block; }
+lexis-logo .hex { fill: rgb(19, 6, 26); stroke: rgb(19, 6, 26); }
+lexis-logo .shape > * { fill: rgb(54, 26, 64); stroke: rgb(54, 26, 64); }
+lexis-logo .labels > text { fill: rgb(194, 173, 188); font-family: Ubuntu, "DejaVu Sans", Arial, sans-serif; font-size: 72px; font-weight: 700; text-anchor: middle; letter-spacing: 6px; }
+nav-bar nav { position: fixed; top: 0px; left: 0px; right: 0px; z-index: 300; display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 2rem; background: rgba(31, 10, 36, 0.72); backdrop-filter: blur(14px) saturate(140%); border-bottom: var(--border-width) solid rgba(255, 255, 255, 0.06); }
+nav-bar .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.3rem; color: var(--white); text-decoration: none; letter-spacing: -0.5px; margin-right: 2rem; position: relative; cursor: default; -webkit-tap-highlight-color: transparent; }
+nav-bar .mark { width: 1.6rem; height: auto; display: block; }
+nav-bar .logo.has-menu { cursor: pointer; }
+nav-bar .logo-text { position: relative; }
+nav-bar .logo.has-funnel > .logo-text::after { content: ""; position: absolute; bottom: -7px; left: 0px; width: 100%; height: 8px; background: linear-gradient(var(--text), var(--text)) center 0    / 70% 1px no-repeat,
+                       linear-gradient(var(--text), var(--text)) center 50%  / 50% 1px no-repeat,
+                       linear-gradient(var(--text), var(--text)) center 100% / 30% 1px no-repeat; opacity: 0; transition: opacity 0.8s, background 0.3s; }
+nav-bar .logo.has-funnel.funnel-visible > .logo-text::after { opacity: 0.7; }
+nav-bar .logo.menu-open > .logo-text::after { opacity: 1; background: linear-gradient(var(--accent), var(--accent)) center 0    / 70% 1px no-repeat,
+                       linear-gradient(var(--accent), var(--accent)) center 50%  / 50% 1px no-repeat,
+                       linear-gradient(var(--accent), var(--accent)) center 100% / 30% 1px no-repeat; }
+nav-bar .links { display: flex; gap: 2rem; overflow-x: auto; scrollbar-width: none; align-items: center; }
+nav-bar .links::-webkit-scrollbar { display: none; }
+nav-bar .links a { color: var(--muted); text-decoration: none; font-size: 0.92rem; letter-spacing: 0.03em; cursor: pointer; transition: color 0.2s; white-space: nowrap; position: relative; -webkit-tap-highlight-color: transparent; }
+nav-bar .links a:hover { color: var(--white); }
+nav-bar .links a.active { color: var(--white); }
+nav-bar .links a.active::after { content: ""; position: absolute; left: 0px; right: 0px; bottom: -6px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--sky), var(--accent)); }
+nav-bar .links a.gh { padding: 0.35rem 0.8rem; border-radius: 999px; border: var(--border-width) solid rgba(255,255,255,0.14); }
+nav-bar .links a.gh:hover { border-color: var(--accent); }
+@media (max-width: 768px) {
+  nav-bar nav { padding: 0.7rem 1rem; }
+  nav-bar .logo { margin-right: 1rem; }
+  nav-bar .links { gap: 1rem; }
+}
+@media (max-width: 480px) {
+  nav-bar .logo-text { display: none; }
+  nav-bar .links a { font-size: 0.8rem; letter-spacing: 0px; }
+}
+app-root { display: block; }
+:root { --black: #1f0a24; --bg-1: #240d29; --bg-2: #29102e; --bg-3: #311536; --bg-4: #381a3e; --bg-5: #422147; --bg-6: #4c2951; --bg-7: #57325c; --border: #67406c; --border-light: #7a547f; --dim: #a68f9f; --slate: #a99db0; --muted: #b9a6b4; --muted-alt: #c4b3bf; --secondary: #d7c9d2; --subtle: #e2d7de; --text: #f0e8ed; --text-light: #f7f2f5; --white: #fff; --accent: #d4b0e6; --sky: #afc0d1; --steel: #8e9dba; --indigo: #8786b0; --lilac: #a08ab2; --rose: #e3a8c7; --navy: #2a1e4a; --green: #a6d6a0; --red: #f08a8a; --blue: #8e9dba; --amber: #f0c27b; --gold: #f0d29b; --salmon: #f0a58c; --font-sans: 'Ubuntu', system-ui, -apple-system, 'Segoe UI', sans-serif; --font-mono: 'Ubuntu Mono', 'Fira Code', ui-monospace, monospace; --tracking: 0.08em; --radius-sm: 4px; --radius: 8px; --radius-lg: 12px; --border-width: 1px; }
+html { font-size: 100%; scroll-behavior: smooth; }
+html, body { margin: 0px; background: var(--black); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+body { background-image: ; background-position-x: ; background-position-y: ; background-size: ; background-repeat: ; background-origin: ; background-clip: ; background-color: ; background-attachment: fixed; }
+*, ::before, ::after { box-sizing: border-box; }
+::selection { background: rgba(212, 176, 230, 0.35); }
+a { color: var(--accent); }
+button { user-select: none; cursor: pointer; font-family: inherit; transition: transform 0.1s, filter 0.1s; }
+button:active { transform: scale(0.96); filter: brightness(1.2); }
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+site-footer { display: block; border-top: var(--border-width) solid rgba(255,255,255,0.07); background: rgba(10, 2, 8, 0.35); }
+site-footer footer { max-width: 1100px; margin: 0px auto; padding: 3.5rem 2rem 2.5rem; display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
+site-footer .brand { display: flex; align-items: center; gap: 0.7rem; font-size: 1.4rem; font-weight: 700; color: var(--white); }
+site-footer .mark { width: 2rem; }
+site-footer .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+site-footer h5 { margin: 0px 0px 0.8rem; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); font-weight: 500; }
+site-footer .cols a { display: block; color: var(--secondary); text-decoration: none; font-size: 0.92rem; margin-bottom: 0.45rem; transition: color 0.2s; }
+site-footer .cols a:hover { color: var(--accent); }
+site-footer .legal { grid-column: 1 / -1; margin: 1.5rem 0px 0px; font-size: 0.78rem; color: var(--dim); }
+@media (max-width: 700px) {
+  site-footer footer { grid-template-columns: 1fr; }
+  site-footer .cols { grid-template-columns: repeat(2, 1fr); }
+}
+hero-section { display: flex; align-items: center; min-height: 100vh; padding: 7rem 2.5rem 5rem; position: relative; overflow: hidden; }
+hero-section > .bg { position: absolute; inset: 0px; z-index: 0; pointer-events: none; }
+hero-section > .shade { position: absolute; inset: 0px; z-index: 0; pointer-events: none; background: linear-gradient(90deg, rgba(31, 10, 36, 0.92) 0%, rgba(31, 10, 36, 0.6) 38%, rgba(31, 10, 36, 0) 65%); }
+hero-section > .hero { position: relative; width: 100%; max-width: 1200px; margin: 0px auto; display: flex; align-items: flex-start; gap: clamp(1.5rem, 3vw, 2.75rem); }
+hero-section .hero > .logo { flex: 0 0 auto; }
+hero-section .logo > svg { width: 100%; height: 100%; }
+hero-section .hero > .copy { text-align: left; flex: 0 0 auto; width: 36rem; max-width: 100%; }
+hero-section .copy > .title { font-size: clamp(4rem, 9vw, 7rem); font-weight: 700; color: var(--white); letter-spacing: -0.045em; line-height: 0.85; margin: -0.05em 0px 1rem; perspective: 600px; }
+hero-section .title > span { display: inline-block; }
+hero-section .copy > .tagline { font-size: clamp(1.3rem, 2.4vw, 1.8rem); color: var(--accent); font-weight: 300; margin: 0px 0px 1.1rem; letter-spacing: -0.01em; }
+hero-section .copy > .sub { font-size: 1.08rem; color: var(--secondary); line-height: 1.7; margin: 0px 0px 2rem; font-weight: 300; }
+hero-section .copy > .cta { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+hero-section .cta > button { font-size: 1rem; padding: 0.8rem 1.5rem; border-radius: 999px; font-weight: 500; letter-spacing: 0.01em; }
+hero-section .cta > .primary { background: linear-gradient(135deg, rgb(227, 195, 240), rgb(175, 192, 209)); color: rgb(44, 11, 34); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; box-shadow: rgba(212, 176, 230, 0.7) 0px 10px 30px -10px; }
+hero-section .cta > .primary:hover { filter: brightness(1.06); box-shadow: rgba(212, 176, 230, 0.9) 0px 14px 40px -10px; }
+hero-section .cta > .ghost { background: rgba(255, 255, 255, 0.04); color: var(--text); border: var(--border-width) solid rgba(255,255,255,0.16); }
+hero-section .cta > .ghost:hover { border-color: var(--accent); color: var(--white); }
+hero-section > .scroll-hint { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 1; color: var(--dim); font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase; animation: 2.4s ease-in-out 0s infinite normal none running bob; }
+hero-section > .scroll-hint::after { content: ""; display: block; width: 1px; height: 28px; margin: 0.5rem auto 0px; background: linear-gradient(var(--dim), transparent); }
+@keyframes bob { 
+  50% { transform: translate(-50%, 6px); }
+}
+@media (max-width: 1000px) {
+  hero-section .hero > .logo { display: none; }
+  hero-section { padding: 6rem 1.25rem 4rem; }
+  hero-section > .hero { flex-direction: column; }
+  hero-section > .shade { background: rgba(31, 10, 36, 0.55); }
+}
+story-section { display: block; max-width: 1100px; margin: 0px auto; padding: 6rem 2rem; }
+story-section > section { display: flex; flex-direction: column; gap: 2.5rem; }
+story-section .text > .eyebrow { display: inline-block; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--sky); margin-bottom: 1rem; }
+story-section .text > h2 { font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; margin: 0px 0px 1.5rem; color: var(--white); max-width: 18ch; }
+story-section .text > .body { color: var(--secondary); font-size: 1.12rem; line-height: 1.8; font-weight: 300; }
+story-section .body > p { margin: 0px 0px 1.1rem; max-width: 68ch; }
+story-section .body > p > code { font-family: var(--font-mono); background: rgba(255, 255, 255, 0.07); padding: 0.1rem 0.4rem; border-radius: 4px; color: var(--accent); font-size: 0.95em; }
+story-section .body > p > strong { color: var(--white); font-weight: 500; }
+story-section .body > .card { margin-top: 2.5rem; padding: 1.75rem; border-radius: 18px; background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)); border: var(--border-width) solid rgba(255,255,255,0.08); box-shadow: rgba(0, 0, 0, 0.8) 0px 30px 80px -40px; backdrop-filter: blur(6px); }
+@media (max-width: 600px) {
+  story-section { padding: 4rem 1.1rem; }
+  story-section .body > .card { padding: 1rem; }
+}
+partition-viz { display: block; position: relative; }
+partition-viz .controls { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+partition-viz .seg { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(0, 0, 0, 0.25); border: var(--border-width) solid rgba(255,255,255,0.08); }
+partition-viz .seg button { background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: var(--muted); padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.85rem; transition: background 0.25s, color 0.25s; }
+partition-viz .seg button.on { background: rgba(255, 255, 255, 0.1); color: var(--white); box-shadow: rgba(255, 255, 255, 0.12) 0px 0px 0px 1px inset; }
+partition-viz .queries { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+partition-viz .qlabel { font-family: var(--font-mono); color: var(--dim); font-size: 0.8rem; margin-right: 0.2rem; }
+partition-viz .q { font-family: var(--font-mono); font-size: 0.78rem; color: var(--secondary); background: rgba(255, 255, 255, 0.03); border: var(--border-width) solid rgba(255,255,255,0.1); padding: 0.35rem 0.65rem; border-radius: var(--radius); }
+partition-viz .q.on { color: var(--white); border-color: var(--accent); background: rgba(212, 176, 230, 0.12); }
+partition-viz .stage { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+partition-viz .node { position: relative; border-radius: var(--radius-lg); padding: 3.1rem 0.75rem 0.75rem; background: rgba(20, 4, 16, 0.45); border: var(--border-width) solid rgba(255,255,255,0.07); transition: border-color 0.4s, box-shadow 0.4s; }
+partition-viz .node.scan { border-color: rgba(142, 157, 186, 0.55); box-shadow: rgba(142, 157, 186, 0.25) 0px 0px 0px 1px, rgba(142, 157, 186, 0.6) 0px 0px 40px -12px; }
+partition-viz .node-label { position: absolute; top: 0.8rem; left: 0.9rem; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+partition-viz .node-label b { color: var(--secondary); font-weight: 500; }
+partition-viz .slot { height: 2.6rem; margin-bottom: 0.45rem; border-radius: var(--radius); border: 1px dashed rgba(255, 255, 255, 0.05); }
+partition-viz .slot:nth-child(2n+1):not(:first-child) { }
+partition-viz .tablet { position: absolute; left: 0.4rem; right: 0.4rem; border-radius: 10px; border: 1px solid rgba(175, 192, 209, 0); pointer-events: none; transition: border-color 0.5s, background 0.5s, box-shadow 0.5s, opacity 0.5s; opacity: 0; }
+partition-viz .tablet .tl { position: absolute; top: -0.55rem; right: 0.6rem; font-size: 0.62rem; font-family: var(--font-mono); color: var(--sky); background: var(--bg-2); padding: 0px 0.35rem; border-radius: 4px; letter-spacing: 0.04em; }
+partition-viz .lexis .tablet { opacity: 1; border-color: rgba(175, 192, 209, 0.28); }
+partition-viz .lexis .tablet.hit { border-color: rgba(212, 176, 230, 0.9); background: rgba(212, 176, 230, 0.07); box-shadow: rgba(212, 176, 230, 0.7) 0px 0px 30px -8px; }
+partition-viz .chip { position: absolute; top: 0px; left: 0px; height: 2.6rem; display: flex; align-items: center; gap: 0.55rem; padding: 0px 0.75rem; border-radius: var(--radius); font-family: var(--font-mono); font-size: 0.85rem; color: var(--text); background: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04)); border: var(--border-width) solid rgba(255,255,255,0.1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; will-change: transform; transition: opacity 0.4s, border-color 0.4s, box-shadow 0.4s, background 0.4s; }
+partition-viz .chip i { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+partition-viz .chip.g-collection i { background: var(--sky); }
+partition-viz .chip.g-orders i { background: var(--indigo); }
+partition-viz .chip.g-users i { background: var(--lilac); }
+partition-viz .chip.dim { opacity: 0.32; }
+partition-viz .chip.hit { border-color: rgba(212, 176, 230, 0.85); color: var(--white); background: linear-gradient(rgba(212, 176, 230, 0.28), rgba(212, 176, 230, 0.12)); box-shadow: rgba(212, 176, 230, 0.8) 0px 6px 24px -8px; }
+partition-viz .verdict { margin-top: 1.25rem; display: flex; align-items: center; gap: 0.7rem; font-size: 0.98rem; color: var(--secondary); min-height: 1.6rem; }
+partition-viz .verdict .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); flex: 0 0 auto; transition: background 0.3s, box-shadow 0.3s; }
+partition-viz .verdict.bad .dot { background: var(--steel); box-shadow: 0 0 12px var(--steel); }
+@media (max-width: 720px) {
+  partition-viz .stage { gap: 0.4rem; }
+  partition-viz .node { padding: 2.9rem 0.3rem 0.3rem; }
+  partition-viz .chip { font-size: 0.62rem; padding: 0px 0.35rem; gap: 0.3rem; }
+  partition-viz .chip i { width: 6px; height: 6px; }
+  partition-viz .tablet .tl { display: none; }
+}
+token-sort { display: block; font-family: var(--font-mono); }
+token-sort .head, token-sort .row { display: grid; grid-template-columns: minmax(11rem, 1fr) minmax(12rem, 1fr) minmax(0px, 2.2fr); gap: 1rem; align-items: center; padding: 0px 1rem; }
+token-sort .head { font-family: var(--font-sans); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); padding-bottom: 0.6rem; }
+token-sort .head .on { color: var(--accent); }
+token-sort .rows { position: relative; }
+token-sort .row { height: 2.9rem; border-radius: var(--radius); font-size: 0.9rem; background: rgba(255, 255, 255, 0.03); border: var(--border-width) solid rgba(255,255,255,0.06); margin-bottom: 0.4rem; will-change: transform; }
+token-sort .key { color: var(--text); white-space: nowrap; }
+token-sort .key b { color: var(--dim); font-weight: 400; }
+token-sort .m { color: var(--muted); font-size: 0.82rem; transition: color 0.3s, opacity 0.3s; }
+token-sort .l { font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: opacity 0.3s; letter-spacing: 0.02em; }
+token-sort .by-lexis .m { opacity: 0.45; }
+token-sort .by-murmur .l { opacity: 0.45; }
+token-sort .c0 { color: var(--sky); }
+token-sort .c1 { color: var(--accent); }
+token-sort .c2 { color: var(--gold); }
+token-sort .t { color: var(--dim); opacity: 0.6; }
+token-sort .foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1rem; }
+token-sort .seg { display: inline-flex; padding: 4px; border-radius: 999px; font-family: var(--font-sans); background: rgba(0, 0, 0, 0.25); border: var(--border-width) solid rgba(255,255,255,0.08); }
+token-sort .seg button { background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: var(--muted); padding: 0.45rem 0.95rem; border-radius: 999px; font-size: 0.82rem; transition: background 0.25s, color 0.25s; }
+token-sort .seg button.on { background: rgba(255, 255, 255, 0.1); color: var(--white); box-shadow: rgba(255, 255, 255, 0.12) 0px 0px 0px 1px inset; }
+token-sort .legend { font-size: 0.72rem; color: var(--dim); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+token-sort .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 0.5rem; }
+token-sort .legend i.c0 { background: var(--sky); }
+token-sort .legend i.c1 { background: var(--accent); }
+token-sort .legend i.c2 { background: var(--gold); }
+token-sort .legend i.t { background: var(--dim); }
+@media (max-width: 720px) {
+  token-sort .head, token-sort .row { grid-template-columns: 1fr; gap: 0.15rem; padding: 0.5rem 0.75rem; }
+  token-sort .row { height: auto; }
+  token-sort .head .hm, token-sort .head .hl { display: none; }
+}
+tablet-split { display: block; position: relative; }
+tablet-split :host > .ruler { position: relative; height: 1.5rem; margin-top: 3px; }
+tablet-split .ruler > i { position: absolute; top: 0px; width: 1px; height: 4px; margin-left: -0.5px; background: rgba(240, 232, 237, 0.22); }
+tablet-split .ruler > i.major { height: 9px; background: rgba(240, 232, 237, 0.55); }
+tablet-split .ruler > span { position: absolute; top: 12px; transform: translateX(-50%); font-family: var(--font-mono); font-size: 0.68rem; line-height: 1; font-weight: 400; letter-spacing: 0px; color: var(--dim); white-space: nowrap; }
+tablet-split .sky { position: relative; height: 70px; }
+tablet-split .drop { position: absolute; top: 0px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+tablet-split .bar { position: relative; height: 64px; border-radius: 10px; background: rgba(0, 0, 0, 0.25); border: var(--border-width) solid rgba(255,255,255,0.08); }
+tablet-split .tablet { position: absolute; top: 4px; bottom: 4px; border-radius: 7px; overflow: hidden; background: rgba(255, 255, 255, 0.05); border: 1.5px solid var(--c); transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1), width 0.6s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.6s; }
+tablet-split .tablet .fill { position: absolute; left: 0px; right: 0px; bottom: 0px; height: 0%; background: linear-gradient(0deg, var(--c), transparent); opacity: 0.55; transition: height 0.25s; }
+tablet-split .tablet.hot { box-shadow: rgba(227, 168, 199, 0.8) 0px 0px 24px -4px; border-color: var(--rose); }
+tablet-split .tablet .tag { position: absolute; left: 6px; top: 4px; font-family: var(--font-mono); font-size: 0.6rem; color: var(--text); opacity: 0.8; white-space: nowrap; }
+tablet-split .shards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin-top: 1rem; }
+tablet-split .shard { border-radius: var(--radius); padding: 0.55rem 0.7rem; font-size: 0.72rem; background: rgba(255, 255, 255, 0.03); border: var(--border-width) solid rgba(255,255,255,0.07); color: var(--muted); display: flex; flex-direction: column; gap: 0.35rem; }
+tablet-split .shard b { display: flex; align-items: center; gap: 0.4rem; font-weight: 500; color: var(--secondary); }
+tablet-split .shard b i { width: 8px; height: 8px; border-radius: 2px; background: var(--c); }
+tablet-split .meter { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+tablet-split .meter span { display: block; height: 100%; width: 0%; background: var(--c); transition: width 0.4s; }
+tablet-split .log { margin-top: 0.9rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); min-height: 1.2rem; }
+@media (max-width: 640px) {
+  tablet-split .shards { grid-template-columns: repeat(2, 1fr); }
+  tablet-split .ruler > span.odd { display: none; }
+  tablet-split .tablet .tag { display: none; }
+}
+home-page { display: block; min-height: 100vh; }
+home-page .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
+home-page .compare > .pane { padding: 1.75rem; border-radius: 18px; position: relative; overflow: hidden; background: rgba(255, 255, 255, 0.03); border: var(--border-width) solid rgba(255,255,255,0.08); }
+home-page .compare > .pane.new { background: linear-gradient(160deg, rgba(212, 176, 230, 0.12), rgba(175, 192, 209, 0.04)); border-color: rgba(212, 176, 230, 0.3); }
+home-page .pane > h3 { color: var(--white); font-size: 1.3rem; font-weight: 500; margin: 0.9rem 0px 0.6rem; }
+home-page .pane > p { font-size: 0.98rem; margin: 0px 0px 1.5rem; }
+home-page .pane > .pill { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 999px; color: var(--muted); border: var(--border-width) solid rgba(255,255,255,0.15); }
+home-page .pane > .pill.on { color: rgb(44, 11, 34); background: var(--accent); border-color: var(--accent); }
+home-page .pane > .ring { width: 150px; height: 150px; border-radius: 50%; margin: 0px auto; position: relative; background: conic-gradient(var(--red) 0 40deg, var(--steel) 40deg 220deg,
+                            var(--red) 220deg 250deg, var(--indigo) 250deg 360deg); mask: radial-gradient(circle, transparent 52%, rgb(0, 0, 0) 53%); animation: 30s linear 0s infinite normal none running spin; opacity: 0.8; }
+@keyframes spin { 
+  100% { transform: rotate(360deg); }
+}
+home-page .pane > .lanes { display: flex; flex-direction: column; gap: 0.55rem; }
+home-page .lanes > div { display: flex; gap: 4px; height: 22px; }
+home-page .lanes > div > i { display: block; border-radius: 5px; background: var(--sky); opacity: 0.85; animation: 6s ease-in-out 0s infinite normal none running breathe; }
+home-page .lanes > div > i:nth-child(2) { background: var(--steel); animation-delay: -1.5s; }
+home-page .lanes > div > i:nth-child(3) { background: var(--indigo); animation-delay: -3s; }
+home-page .lanes > div > i:nth-child(4) { background: var(--lilac); animation-delay: -4.5s; }
+@keyframes breathe { 
+  50% { opacity: 0.45; }
+}
+home-page .body > .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 1rem; margin-top: 0.5rem; }
+home-page .grid > .feat { padding: 1.5rem; border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: var(--border-width) solid rgba(255,255,255,0.07); transition: border-color 0.3s, transform 0.3s, background 0.3s; }
+home-page .grid > .feat:hover { border-color: rgba(212, 176, 230, 0.45); background: rgba(212, 176, 230, 0.06); transform: translateY(-3px); }
+home-page .feat > h4 { margin: 0px 0px 0.5rem; color: var(--white); font-size: 1.08rem; font-weight: 500; }
+home-page .feat > p { font-size: 0.95rem; line-height: 1.6; margin: 0px 0px 1rem; }
+home-page .feat > code { display: inline-block; font-size: 0.8rem; }
+home-page .body > .more { margin-top: 2rem; background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: var(--accent); font-size: 1rem; padding: 0px; }
+home-page .body > .more:hover { color: var(--white); }
+home-page > .final { text-align: center; padding: 6rem 2rem 7rem; max-width: 900px; margin: 0px auto; }
+home-page .final > h2 { font-size: clamp(2.2rem, 5vw, 3.6rem); letter-spacing: -0.03em; margin: 0px 0px 2rem; color: var(--white); font-weight: 700; }
+home-page .final > .cmd { display: inline-block; font-family: var(--font-mono); font-size: 1.05rem; color: var(--text); padding: 1rem 1.4rem; border-radius: var(--radius-lg); background: rgba(10, 2, 8, 0.5); border: var(--border-width) solid rgba(255,255,255,0.1); margin-bottom: 2rem; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+home-page .cmd > .p { color: var(--sky); margin-right: 0.6rem; }
+home-page .final > .buttons { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; }
+home-page .buttons > button { font-size: 1rem; padding: 0.8rem 1.5rem; border-radius: 999px; font-weight: 500; }
+home-page .buttons > .primary { background: linear-gradient(135deg, rgb(227, 195, 240), rgb(175, 192, 209)); color: rgb(44, 11, 34); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; box-shadow: rgba(212, 176, 230, 0.7) 0px 10px 30px -10px; }
+home-page .buttons > .ghost { background: rgba(255, 255, 255, 0.04); color: var(--text); border: var(--border-width) solid rgba(255,255,255,0.16); }
+home-page .buttons > .ghost:hover { border-color: var(--accent); }</style><script type="application/json" id="yaw-ssg-state">{"components":{"0":{"route":"/overview"},"1":{"eyebrow":"01 · the idea","heading":"Partitions, stored in key order."},"2":{"mode":"\"murmur\"","queryIndex":"0","verdict":"Hashed by the whole path: 3 matches spread over 3 of 3 nodes."},"3":{"eyebrow":"02 · the token","heading":"The token is the key, byte for byte."},"4":{"by":"\"murmur\""},"5":{"eyebrow":"03 · the constraint","heading":"Ordered partitioning, made for tablets."},"6":{"eyebrow":"04 · hotspots","heading":"Hot tablets split and move."},"7":{"log":"writes arriving…"},"8":{"eyebrow":"05 · what you get","heading":"Partial keys become range reads."},"9":{"eyebrow":"06 · prior art","heading":"Bigtable's query model on modern hardware."}},"services":{"TocMenuService":{"open":"false","available":"[]","scrollToActive":"false"},"TocMenuItemsService":{"activeId":"","expandAll":"false","tree":"[{\"id\":\"idea\",\"label\":\"\\n            In Lexis the token of a partition is its key, encoded so that\\n               byte order is key order. Partitions that share a prefix are stored together,\\n               so a query on the start of a key reads one contiguous range of tablets.\\n            Pick a query and see where its rows live, hashed or ordered.\\n            \\n        \",\"depth\":0,\"childEntries\":[]},{\"id\":\"token\",\"label\":\"\\n            Each partition key component is written out as order-preserving bytes\\n               and closed with a 00 00 terminator, so memcmp\\n               on two tokens gives the same answer as comparing the keys. Text is its\\n               UTF-8 bytes. Integers, varints, decimals and timestamps get encodings that\\n               sort in CQL order, negatives included. In cqlsh and the drivers,\\n               token() is a blob.\\n            \\n        \",\"depth\":0,\"childEntries\":[]},{\"id\":\"tablets\",\"label\":\"\\n            Ordered partitioning on a single cluster-global token ring meant one set of\\n               boundaries had to suit every table. Tablets give each table its own\\n               independent mapping, so every table is balanced on its own keys.\\n            \\n                \\n                    vnodes\\n                    One ring for every table\\n                    Token boundaries are shared across the cluster. Ordered keys from\\n                       different tables pile into different parts of the same ring.\\n                    \\n                \\n                \\n                    tablets\\n                    A mapping per table\\n                    Each table has its own token-range-to-node-and-core mapping. There is no\\n                       shared ring, so one table's distribution can't unbalance another's.\\n                    \\n                        \\n                        \\n                        \\n                    \\n                \\n            \\n        \",\"depth\":0,\"childEntries\":[]},{\"id\":\"hotspots\",\"label\":\"\\n            The tablet load balancer splits a hot tablet and migrates the halves, down to a\\n               specific core on a specific node. A high-entropy leading key component spreads\\n               writes across the key space; whatever concentration remains is handled by\\n               splitting, with no schema changes.\\n            \\n        \",\"depth\":0,\"childEntries\":[]},{\"id\":\"queries\",\"label\":\"\\n            Queries that would need secondary indexes become efficient range reads, routed to a\\n               bounded set of nodes and cores. The query model gets substantially more expressive,\\n               with no sacrifice in distribution or performance.\\n            \\n                \\n                    Prefix scans\\n                    Name the start of a partition key, get every partition under it as one\\n                       contiguous range, in key order.\\n                    WHERE coll = 'collection'\\n                \\n                \\n                    Ranges on the last component\\n                    Page through a collection, or take a range of collections, with no\\n                       full-cluster scatter.\\n                    AND docid > 'd100' LIMIT 2\\n                \\n                \\n                    IN, then a range\\n                    Several prefixes at once, each ending in a range: one bounded read per prefix.\\n                    colid IN ('c1','c42') AND docid > 'd1'\\n                \\n                \\n                    LIMIT means first\\n                    A LIMIT on a full scan returns the first keys of the table, in order.\\n                    SELECT * FROM docs LIMIT 2\\n                \\n                \\n                    Simpler data models\\n                    For range-ordered access patterns, secondary indexes and denormalized\\n                       tables become unnecessary. One table, keyed by path.\\n                    PRIMARY KEY ((coll, colid, docid))\\n                \\n                \\n                    Routed by the drivers\\n                    The Python and Rust drivers compute Lexis tokens on the client and send each\\n                       query to the node and shard that own it.\\n                    token() → blob\\n                \\n            \\n            See every query, with results →\\n        \",\"depth\":0,\"childEntries\":[]},{\"id\":\"prior-art\",\"label\":\"\\n            Lexicographic order, per-table tablets and dynamic splitting are the model Google\\n               Bigtable has offered since 2004. Lexis brings it to a per-core, shared-nothing\\n               architecture, where a tablet split moves work to a specific core on a specific node:\\n               a finer granularity of load balancing than anything else available.\\n            Together they make something new in open source distributed databases:\\n               Bigtable's query model on modern hardware.\\n        \",\"depth\":0,\"childEntries\":[]}]"}},"directives":{}}</script><script type="application/json" id="yaw-ssg-routes">["/","/overview","/install","/examples"]</script></head>
+<body data-ssg-ready="">
+
+
+<app-root data-rx-host="">
+        <nav-bar data-rx-host="" data-ssg-id="0">
+        <nav>
+            <a class="logo has-funnel" toc-menu-toggle="">
+                <lexis-logo class="mark" data-rx-host="">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="210 111 835 1024" role="img" aria-label="Lexis">
+            <path class="hex" stroke-width="30" stroke-linejoin="round" d="M 671.9,172.3 L 965.1,343.7 Q 1010,370 1010.0,422.0 L 1010.0,828.0 Q 1010,880 964.9,905.9 L 672.1,1074.1 Q 627,1100 581.9,1074.0 L 290.1,906.0 Q 245,880 245.0,828.0 L 245.0,422.0 Q 245,370 289.9,343.7 L 582.1,172.3 Q 627,146 671.9,172.3 Z"></path>
+            <g class="shape">
+                <rect x="380" y="362" width="155" height="128" rx="6"></rect>
+                <rect x="380" y="505" width="155" height="128" rx="6"></rect>
+                <rect x="380" y="648" width="155" height="125" rx="6"></rect>
+                <rect x="380" y="787" width="155" height="123" rx="6"></rect>
+                <line x1="590" y1="332" x2="590" y2="903" stroke-width="18" stroke-linecap="round"></line>
+                <polygon points="619,399 846,399 886,459 846,519 619,519" stroke-width="8" stroke-linejoin="round"></polygon>
+                <polygon points="619,556 879,556 921,621 879,686 619,686" stroke-width="8" stroke-linejoin="round"></polygon>
+                <polygon points="619,722 879,722 921,785 879,848 619,848" stroke-width="8" stroke-linejoin="round"></polygon>
+            </g>
+            <g class="labels">
+                <text x="458" y="452">00</text>
+                <text x="458" y="595">7F</text>
+                <text x="458" y="736">80</text>
+                <text x="458" y="873">FF</text>
+            </g>
+        </svg>
+    </lexis-logo>
+                <span class="logo-text">Lexis</span>
+            </a>
+            <div class="links">
+                <a data-rx-bind-class-active="isActive('/')" data-rx-bind-on-click="navigateHome" class="active">Concept</a>
+                <a data-rx-bind-class-active="isActive('/install')" data-rx-bind-on-click="navigateInstall">Install</a>
+                <a data-rx-bind-class-active="isActive('/examples')" data-rx-bind-on-click="navigateExamples">Examples</a>
+                <a class="gh" href="https://github.com/jk89/lexisdb" target="_blank" rel="noopener">GitHub ↗</a>
+            </div>
+        </nav>
+    </nav-bar>
+        <rx-router-outlet data-rx-host=""><home-page data-rx-host="">
+        <hero-section data-rx-host="">
+        <div class="bg" token-ring-bg=""><canvas width="800" height="600" style="position: absolute; inset: 0px; width: 100%; height: 100%; display: block;"></canvas></div>
+        <div class="shade"></div>
+        <div class="hero">
+            <lexis-logo class="logo" data-rx-host="" style="height: 140px; width: 114.16px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="210 111 835 1024" role="img" aria-label="Lexis">
+            <path class="hex" stroke-width="30" stroke-linejoin="round" d="M 671.9,172.3 L 965.1,343.7 Q 1010,370 1010.0,422.0 L 1010.0,828.0 Q 1010,880 964.9,905.9 L 672.1,1074.1 Q 627,1100 581.9,1074.0 L 290.1,906.0 Q 245,880 245.0,828.0 L 245.0,422.0 Q 245,370 289.9,343.7 L 582.1,172.3 Q 627,146 671.9,172.3 Z"></path>
+            <g class="shape">
+                <rect x="380" y="362" width="155" height="128" rx="6"></rect>
+                <rect x="380" y="505" width="155" height="128" rx="6"></rect>
+                <rect x="380" y="648" width="155" height="125" rx="6"></rect>
+                <rect x="380" y="787" width="155" height="123" rx="6"></rect>
+                <line x1="590" y1="332" x2="590" y2="903" stroke-width="18" stroke-linecap="round"></line>
+                <polygon points="619,399 846,399 886,459 846,519 619,519" stroke-width="8" stroke-linejoin="round"></polygon>
+                <polygon points="619,556 879,556 921,621 879,686 619,686" stroke-width="8" stroke-linejoin="round"></polygon>
+                <polygon points="619,722 879,722 921,785 879,848 619,848" stroke-width="8" stroke-linejoin="round"></polygon>
+            </g>
+            <g class="labels">
+                <text x="458" y="452">00</text>
+                <text x="458" y="595">7F</text>
+                <text x="458" y="736">80</text>
+                <text x="458" y="873">FF</text>
+            </g>
+        </svg>
+    </lexis-logo>
+            <div class="copy">
+                <h1 class="title"><span>L</span><span>e</span><span>x</span><span>i</span><span>s</span></h1>
+                <p class="tagline">Distributed data, in key order.</p>
+                <p class="sub">Byte-ordered partitioning built on tablets. Partitions are stored
+                   and distributed in key order, so you can query any prefix or range of a
+                   partition key and read it back in order, straight from the nodes that hold it.</p>
+                <div class="cta">
+                    <button class="primary" data-rx-bind-on-click="toInstall">Get started</button>
+                    <button class="ghost" data-rx-bind-on-click="toExamples">See the queries →</button>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-hint">scroll</div>
+    </hero-section>
+
+        <story-section toc-section="idea" toc-anchor="idea" eyebrow="01 · the idea" heading="Partitions, stored in key order." data-rx-host="" data-ssg-id="1" style="--toc-depth: 0; scroll-margin-top: 80px;">
+        <section>
+            <div class="text" motion-reveal="" style="opacity: 0;">
+                <span class="eyebrow"><span data-rx-bind-text="eyebrow">01 · the idea</span></span>
+                <h2><span data-rx-bind-text="heading">Partitions, stored in key order.</span></h2>
+                <div class="body">
+            <p>In Lexis the token of a partition <strong>is</strong> its key, encoded so that
+               byte order is key order. Partitions that share a prefix are stored together,
+               so a query on the start of a key reads one contiguous range of tablets.</p>
+            <p>Pick a query and see where its rows live, hashed or ordered.</p>
+            <div class="card"><partition-viz data-rx-host="" data-ssg-id="2">
+        <div class="controls">
+            <div class="seg">
+                <button data-rx-bind-class-on="isMode('murmur')" data-rx-bind-on-click="setMurmur" class="on">Hashed · Murmur3</button>
+                <button data-rx-bind-class-on="isMode('lexis')" data-rx-bind-on-click="setLexis">Ordered · Lexis</button>
+            </div>
+            <div class="queries">
+                <span class="qlabel">WHERE</span>
+                <button class="q on" data-rx-bind-class-on="isQuery('0')" data-rx-bind-on-click="query0">coll = 'collection' AND colid = 'c42'</button>
+                <button class="q" data-rx-bind-class-on="isQuery('1')" data-rx-bind-on-click="query1">coll = 'collection'</button>
+                <button class="q" data-rx-bind-class-on="isQuery('2')" data-rx-bind-on-click="query2">coll = 'users'</button>
+            </div>
+        </div>
+        <div class="stage"><div class="node scan"><span class="node-label">node <b>1</b></span><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div><div class="node scan"><span class="node-label">node <b>2</b></span><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div><div class="node scan"><span class="node-label">node <b>3</b></span><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div><div class="tablet" style="left: 7px; width: 199px; top: 45px; height: 100px;"><span class="tl">tablet 0</span></div><div class="tablet hit" style="left: 238px; width: 199px; top: 45px; height: 100px;"><span class="tl">tablet 1</span></div><div class="tablet hit" style="left: 470px; width: 199px; top: 45px; height: 100px;"><span class="tl">tablet 2</span></div><div class="tablet" style="left: 7px; width: 199px; top: 142px; height: 101px;"><span class="tl">tablet 3</span></div><div class="tablet" style="left: 238px; width: 199px; top: 142px; height: 101px;"><span class="tl">tablet 4</span></div><div class="tablet" style="left: 470px; width: 199px; top: 142px; height: 101px;"><span class="tl">tablet 5</span></div><div class="chip g-collection dim" style="width: 189px; transform: translateX(12px) translateY(196px);"><i></i>collection/c1/d1</div><div class="chip g-collection dim" style="width: 189px; transform: translateX(475px) translateY(50px);"><i></i>collection/c1/d2</div><div class="chip g-collection hit" style="width: 189px; transform: translateX(243px) translateY(98px);"><i></i>collection/c42/d100</div><div class="chip g-collection hit" style="width: 189px; transform: translateX(12px) translateY(50px);"><i></i>collection/c42/d101</div><div class="chip g-collection hit" style="width: 189px; transform: translateX(475px) translateY(147px);"><i></i>collection/c42/d250</div><div class="chip g-collection dim" style="width: 189px; transform: translateX(243px) translateY(196px);"><i></i>collection/c7/d3</div><div class="chip g-collection dim" style="width: 189px; transform: translateX(12px) translateY(147px);"><i></i>collection/c9/d8</div><div class="chip g-orders dim" style="width: 189px; transform: translateX(475px) translateY(196px);"><i></i>orders/o1/i1</div><div class="chip g-orders dim" style="width: 189px; transform: translateX(243px) translateY(50px);"><i></i>orders/o1/i2</div><div class="chip g-users dim" style="width: 189px; transform: translateX(475px) translateY(98px);"><i></i>users/u2/p4</div><div class="chip g-users dim" style="width: 189px; transform: translateX(12px) translateY(98px);"><i></i>users/u7/p1</div><div class="chip g-users dim" style="width: 189px; transform: translateX(243px) translateY(147px);"><i></i>users/u7/p2</div></div>
+        <div class="verdict bad" data-rx-bind-class-bad="isMode('murmur')">
+            <span class="dot"></span><span><span data-rx-bind-text="verdict">Hashed by the whole path: 3 matches spread over 3 of 3 nodes.</span></span>
+        </div>
+    </partition-viz></div>
+        </div>
+            </div>
+        </section>
+    </story-section>
+
+        <story-section toc-section="token" toc-anchor="token" eyebrow="02 · the token" heading="The token is the key, byte for byte." data-rx-host="" data-ssg-id="3" style="--toc-depth: 0; scroll-margin-top: 80px;">
+        <section>
+            <div class="text" motion-reveal="" style="opacity: 0;">
+                <span class="eyebrow"><span data-rx-bind-text="eyebrow">02 · the token</span></span>
+                <h2><span data-rx-bind-text="heading">The token is the key, byte for byte.</span></h2>
+                <div class="body">
+            <p>Each partition key component is written out as order-preserving bytes
+               and closed with a <code>00 00</code> terminator, so <code>memcmp</code>
+               on two tokens gives the same answer as comparing the keys. Text is its
+               UTF-8 bytes. Integers, varints, decimals and timestamps get encodings that
+               sort in CQL order, negatives included. In cqlsh and the drivers,
+               <code>token()</code> is a blob.</p>
+            <div class="card"><token-sort data-rx-host="" data-ssg-id="4">
+        <div class="head">
+            <span class="hk">partition key</span>
+            <span class="hm on" data-rx-bind-class-on="isBy('murmur')">murmur3 token</span>
+            <span class="hl" data-rx-bind-class-on="isBy('lexis')">lexis token</span>
+        </div>
+        <div class="rows by-murmur"><div class="row"><span class="key">collection<b>/</b>c42<b>/</b>d100</span><span class="m">-8410235776021639452</span><span class="l"><span class="c c0">636f6c6c656374696f6e</span><span class="t">0000</span><span class="c c1">633432</span><span class="t">0000</span><span class="c c2">64313030</span><span class="t">0000</span></span></div><div class="row"><span class="key">collection<b>/</b>c42<b>/</b>d250</span><span class="m">-4290117745509316688</span><span class="l"><span class="c c0">636f6c6c656374696f6e</span><span class="t">0000</span><span class="c c1">633432</span><span class="t">0000</span><span class="c c2">64323530</span><span class="t">0000</span></span></div><div class="row"><span class="key">collection<b>/</b>c1<b>/</b>d1</span><span class="m">-1503622098384930114</span><span class="l"><span class="c c0">636f6c6c656374696f6e</span><span class="t">0000</span><span class="c c1">6331</span><span class="t">0000</span><span class="c c2">6431</span><span class="t">0000</span></span></div><div class="row"><span class="key">users<b>/</b>u7<b>/</b>p1</span><span class="m">409812277361002437</span><span class="l"><span class="c c0">7573657273</span><span class="t">0000</span><span class="c c1">7537</span><span class="t">0000</span><span class="c c2">7031</span><span class="t">0000</span></span></div><div class="row"><span class="key">collection<b>/</b>c42<b>/</b>d101</span><span class="m">2287409312844011925</span><span class="l"><span class="c c0">636f6c6c656374696f6e</span><span class="t">0000</span><span class="c c1">633432</span><span class="t">0000</span><span class="c c2">64313031</span><span class="t">0000</span></span></div><div class="row"><span class="key">collection<b>/</b>c1<b>/</b>d2</span><span class="m">6911453290184477201</span><span class="l"><span class="c c0">636f6c6c656374696f6e</span><span class="t">0000</span><span class="c c1">6331</span><span class="t">0000</span><span class="c c2">6432</span><span class="t">0000</span></span></div></div>
+        <div class="foot">
+            <div class="seg">
+                <button data-rx-bind-class-on="isBy('murmur')" data-rx-bind-on-click="byMurmur" class="on">sort by hash</button>
+                <button data-rx-bind-class-on="isBy('lexis')" data-rx-bind-on-click="byLexis">sort by Lexis token</button>
+            </div>
+            <span class="legend"><i class="c0"></i>coll <i class="c1"></i>colid <i class="c2"></i>docid <i class="t"></i>terminator</span>
+        </div>
+    </token-sort></div>
+        </div>
+            </div>
+        </section>
+    </story-section>
+
+        <story-section toc-section="tablets" toc-anchor="tablets" eyebrow="03 · the constraint" heading="Ordered partitioning, made for tablets." data-rx-host="" data-ssg-id="5" style="--toc-depth: 0; scroll-margin-top: 80px;">
+        <section>
+            <div class="text" motion-reveal="" style="opacity: 0;">
+                <span class="eyebrow"><span data-rx-bind-text="eyebrow">03 · the constraint</span></span>
+                <h2><span data-rx-bind-text="heading">Ordered partitioning, made for tablets.</span></h2>
+                <div class="body">
+            <p>Ordered partitioning on a single cluster-global token ring meant one set of
+               boundaries had to suit every table. Tablets give each table its own
+               independent mapping, so every table is balanced on its own keys.</p>
+            <div class="compare">
+                <div class="pane old" motion-reveal="0.05" style="opacity: 0;">
+                    <span class="pill">vnodes</span>
+                    <h3>One ring for every table</h3>
+                    <p>Token boundaries are shared across the cluster. Ordered keys from
+                       different tables pile into different parts of the same ring.</p>
+                    <div class="ring"></div>
+                </div>
+                <div class="pane new" motion-reveal="0.15" style="opacity: 0;">
+                    <span class="pill on">tablets</span>
+                    <h3>A mapping per table</h3>
+                    <p>Each table has its own token-range-to-node-and-core mapping. There is no
+                       shared ring, so one table's distribution can't unbalance another's.</p>
+                    <div class="lanes">
+                        <div><i style="width:18%"></i><i style="width:22%"></i><i style="width:35%"></i><i style="width:25%"></i></div>
+                        <div><i style="width:40%"></i><i style="width:12%"></i><i style="width:20%"></i><i style="width:28%"></i></div>
+                        <div><i style="width:25%"></i><i style="width:25%"></i><i style="width:15%"></i><i style="width:35%"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </section>
+    </story-section>
+
+        <story-section toc-section="hotspots" toc-anchor="hotspots" eyebrow="04 · hotspots" heading="Hot tablets split and move." data-rx-host="" data-ssg-id="6" style="--toc-depth: 0; scroll-margin-top: 80px;">
+        <section>
+            <div class="text" motion-reveal="" style="opacity: 0;">
+                <span class="eyebrow"><span data-rx-bind-text="eyebrow">04 · hotspots</span></span>
+                <h2><span data-rx-bind-text="heading">Hot tablets split and move.</span></h2>
+                <div class="body">
+            <p>The tablet load balancer splits a hot tablet and migrates the halves, down to a
+               specific core on a specific node. A high-entropy leading key component spreads
+               writes across the key space; whatever concentration remains is handled by
+               splitting, with no schema changes.</p>
+            <div class="card"><tablet-split data-rx-host="" data-ssg-id="7">
+        <div class="sky"></div>
+        <div class="bar"><div class="tablet" style="left: 0%; width: 50%; --c: #afc0d1;"><div class="fill" style="height: 0%;"></div><span class="tag">n1·s0</span></div><div class="tablet" style="left: 50%; width: 50%; --c: #8786b0;"><div class="fill" style="height: 0%;"></div><span class="tag">n2·s0</span></div></div>
+        <div class="ruler"><i class="major" style="left: 0%;"></i><i style="left: 0.390625%;"></i><i style="left: 0.78125%;"></i><i style="left: 1.17188%;"></i><i style="left: 1.5625%;"></i><i style="left: 1.95312%;"></i><i style="left: 2.34375%;"></i><i style="left: 2.73438%;"></i><i style="left: 3.125%;"></i><i style="left: 3.51562%;"></i><i style="left: 3.90625%;"></i><i style="left: 4.29688%;"></i><i style="left: 4.6875%;"></i><i style="left: 5.07812%;"></i><i style="left: 5.46875%;"></i><i style="left: 5.85938%;"></i><i class="major" style="left: 6.25%;"></i><span class="odd" style="left: 6.25%;">1000</span><i style="left: 6.64062%;"></i><i style="left: 7.03125%;"></i><i style="left: 7.42188%;"></i><i style="left: 7.8125%;"></i><i style="left: 8.20312%;"></i><i style="left: 8.59375%;"></i><i style="left: 8.98438%;"></i><i style="left: 9.375%;"></i><i style="left: 9.76562%;"></i><i style="left: 10.1562%;"></i><i style="left: 10.5469%;"></i><i style="left: 10.9375%;"></i><i style="left: 11.3281%;"></i><i style="left: 11.7188%;"></i><i style="left: 12.1094%;"></i><i class="major" style="left: 12.5%;"></i><span class="even" style="left: 12.5%;">2000</span><i style="left: 12.8906%;"></i><i style="left: 13.2812%;"></i><i style="left: 13.6719%;"></i><i style="left: 14.0625%;"></i><i style="left: 14.4531%;"></i><i style="left: 14.8438%;"></i><i style="left: 15.2344%;"></i><i style="left: 15.625%;"></i><i style="left: 16.0156%;"></i><i style="left: 16.4062%;"></i><i style="left: 16.7969%;"></i><i style="left: 17.1875%;"></i><i style="left: 17.5781%;"></i><i style="left: 17.9688%;"></i><i style="left: 18.3594%;"></i><i class="major" style="left: 18.75%;"></i><span class="odd" style="left: 18.75%;">3000</span><i style="left: 19.1406%;"></i><i style="left: 19.5312%;"></i><i style="left: 19.9219%;"></i><i style="left: 20.3125%;"></i><i style="left: 20.7031%;"></i><i style="left: 21.0938%;"></i><i style="left: 21.4844%;"></i><i style="left: 21.875%;"></i><i style="left: 22.2656%;"></i><i style="left: 22.6562%;"></i><i style="left: 23.0469%;"></i><i style="left: 23.4375%;"></i><i style="left: 23.8281%;"></i><i style="left: 24.2188%;"></i><i style="left: 24.6094%;"></i><i class="major" style="left: 25%;"></i><span class="even" style="left: 25%;">4000</span><i style="left: 25.3906%;"></i><i style="left: 25.7812%;"></i><i style="left: 26.1719%;"></i><i style="left: 26.5625%;"></i><i style="left: 26.9531%;"></i><i style="left: 27.3438%;"></i><i style="left: 27.7344%;"></i><i style="left: 28.125%;"></i><i style="left: 28.5156%;"></i><i style="left: 28.9062%;"></i><i style="left: 29.2969%;"></i><i style="left: 29.6875%;"></i><i style="left: 30.0781%;"></i><i style="left: 30.4688%;"></i><i style="left: 30.8594%;"></i><i class="major" style="left: 31.25%;"></i><span class="odd" style="left: 31.25%;">5000</span><i style="left: 31.6406%;"></i><i style="left: 32.0312%;"></i><i style="left: 32.4219%;"></i><i style="left: 32.8125%;"></i><i style="left: 33.2031%;"></i><i style="left: 33.5938%;"></i><i style="left: 33.9844%;"></i><i style="left: 34.375%;"></i><i style="left: 34.7656%;"></i><i style="left: 35.1562%;"></i><i style="left: 35.5469%;"></i><i style="left: 35.9375%;"></i><i style="left: 36.3281%;"></i><i style="left: 36.7188%;"></i><i style="left: 37.1094%;"></i><i class="major" style="left: 37.5%;"></i><span class="even" style="left: 37.5%;">6000</span><i style="left: 37.8906%;"></i><i style="left: 38.2812%;"></i><i style="left: 38.6719%;"></i><i style="left: 39.0625%;"></i><i style="left: 39.4531%;"></i><i style="left: 39.8438%;"></i><i style="left: 40.2344%;"></i><i style="left: 40.625%;"></i><i style="left: 41.0156%;"></i><i style="left: 41.4062%;"></i><i style="left: 41.7969%;"></i><i style="left: 42.1875%;"></i><i style="left: 42.5781%;"></i><i style="left: 42.9688%;"></i><i style="left: 43.3594%;"></i><i class="major" style="left: 43.75%;"></i><span class="odd" style="left: 43.75%;">7000</span><i style="left: 44.1406%;"></i><i style="left: 44.5312%;"></i><i style="left: 44.9219%;"></i><i style="left: 45.3125%;"></i><i style="left: 45.7031%;"></i><i style="left: 46.0938%;"></i><i style="left: 46.4844%;"></i><i style="left: 46.875%;"></i><i style="left: 47.2656%;"></i><i style="left: 47.6562%;"></i><i style="left: 48.0469%;"></i><i style="left: 48.4375%;"></i><i style="left: 48.8281%;"></i><i style="left: 49.2188%;"></i><i style="left: 49.6094%;"></i><i class="major" style="left: 50%;"></i><span class="even" style="left: 50%;">8000</span><i style="left: 50.3906%;"></i><i style="left: 50.7812%;"></i><i style="left: 51.1719%;"></i><i style="left: 51.5625%;"></i><i style="left: 51.9531%;"></i><i style="left: 52.3438%;"></i><i style="left: 52.7344%;"></i><i style="left: 53.125%;"></i><i style="left: 53.5156%;"></i><i style="left: 53.9062%;"></i><i style="left: 54.2969%;"></i><i style="left: 54.6875%;"></i><i style="left: 55.0781%;"></i><i style="left: 55.4688%;"></i><i style="left: 55.8594%;"></i><i class="major" style="left: 56.25%;"></i><span class="odd" style="left: 56.25%;">9000</span><i style="left: 56.6406%;"></i><i style="left: 57.0312%;"></i><i style="left: 57.4219%;"></i><i style="left: 57.8125%;"></i><i style="left: 58.2031%;"></i><i style="left: 58.5938%;"></i><i style="left: 58.9844%;"></i><i style="left: 59.375%;"></i><i style="left: 59.7656%;"></i><i style="left: 60.1562%;"></i><i style="left: 60.5469%;"></i><i style="left: 60.9375%;"></i><i style="left: 61.3281%;"></i><i style="left: 61.7188%;"></i><i style="left: 62.1094%;"></i><i class="major" style="left: 62.5%;"></i><span class="even" style="left: 62.5%;">A000</span><i style="left: 62.8906%;"></i><i style="left: 63.2812%;"></i><i style="left: 63.6719%;"></i><i style="left: 64.0625%;"></i><i style="left: 64.4531%;"></i><i style="left: 64.8438%;"></i><i style="left: 65.2344%;"></i><i style="left: 65.625%;"></i><i style="left: 66.0156%;"></i><i style="left: 66.4062%;"></i><i style="left: 66.7969%;"></i><i style="left: 67.1875%;"></i><i style="left: 67.5781%;"></i><i style="left: 67.9688%;"></i><i style="left: 68.3594%;"></i><i class="major" style="left: 68.75%;"></i><span class="odd" style="left: 68.75%;">B000</span><i style="left: 69.1406%;"></i><i style="left: 69.5312%;"></i><i style="left: 69.9219%;"></i><i style="left: 70.3125%;"></i><i style="left: 70.7031%;"></i><i style="left: 71.0938%;"></i><i style="left: 71.4844%;"></i><i style="left: 71.875%;"></i><i style="left: 72.2656%;"></i><i style="left: 72.6562%;"></i><i style="left: 73.0469%;"></i><i style="left: 73.4375%;"></i><i style="left: 73.8281%;"></i><i style="left: 74.2188%;"></i><i style="left: 74.6094%;"></i><i class="major" style="left: 75%;"></i><span class="even" style="left: 75%;">C000</span><i style="left: 75.3906%;"></i><i style="left: 75.7812%;"></i><i style="left: 76.1719%;"></i><i style="left: 76.5625%;"></i><i style="left: 76.9531%;"></i><i style="left: 77.3438%;"></i><i style="left: 77.7344%;"></i><i style="left: 78.125%;"></i><i style="left: 78.5156%;"></i><i style="left: 78.9062%;"></i><i style="left: 79.2969%;"></i><i style="left: 79.6875%;"></i><i style="left: 80.0781%;"></i><i style="left: 80.4688%;"></i><i style="left: 80.8594%;"></i><i class="major" style="left: 81.25%;"></i><span class="odd" style="left: 81.25%;">D000</span><i style="left: 81.6406%;"></i><i style="left: 82.0312%;"></i><i style="left: 82.4219%;"></i><i style="left: 82.8125%;"></i><i style="left: 83.2031%;"></i><i style="left: 83.5938%;"></i><i style="left: 83.9844%;"></i><i style="left: 84.375%;"></i><i style="left: 84.7656%;"></i><i style="left: 85.1562%;"></i><i style="left: 85.5469%;"></i><i style="left: 85.9375%;"></i><i style="left: 86.3281%;"></i><i style="left: 86.7188%;"></i><i style="left: 87.1094%;"></i><i class="major" style="left: 87.5%;"></i><span class="even" style="left: 87.5%;">E000</span><i style="left: 87.8906%;"></i><i style="left: 88.2812%;"></i><i style="left: 88.6719%;"></i><i style="left: 89.0625%;"></i><i style="left: 89.4531%;"></i><i style="left: 89.8438%;"></i><i style="left: 90.2344%;"></i><i style="left: 90.625%;"></i><i style="left: 91.0156%;"></i><i style="left: 91.4062%;"></i><i style="left: 91.7969%;"></i><i style="left: 92.1875%;"></i><i style="left: 92.5781%;"></i><i style="left: 92.9688%;"></i><i style="left: 93.3594%;"></i><i class="major" style="left: 93.75%;"></i><span class="odd" style="left: 93.75%;">F000</span><i style="left: 94.1406%;"></i><i style="left: 94.5312%;"></i><i style="left: 94.9219%;"></i><i style="left: 95.3125%;"></i><i style="left: 95.7031%;"></i><i style="left: 96.0938%;"></i><i style="left: 96.4844%;"></i><i style="left: 96.875%;"></i><i style="left: 97.2656%;"></i><i style="left: 97.6562%;"></i><i style="left: 98.0469%;"></i><i style="left: 98.4375%;"></i><i style="left: 98.8281%;"></i><i style="left: 99.2188%;"></i><i style="left: 99.6094%;"></i><i class="major" style="left: 100%;"></i></div>
+        <div class="shards"><div class="shard" style="--c: #afc0d1;"><b><i></i>node 1 · shard 0</b><div class="meter"><span style="width: 0%;"></span></div><small>1 tablet</small></div><div class="shard" style="--c: #8e9dba;"><b><i></i>node 1 · shard 1</b><div class="meter"><span style="width: 0%;"></span></div><small>0 tablets</small></div><div class="shard" style="--c: #8786b0;"><b><i></i>node 2 · shard 0</b><div class="meter"><span style="width: 0%;"></span></div><small>1 tablet</small></div><div class="shard" style="--c: #a08ab2;"><b><i></i>node 2 · shard 1</b><div class="meter"><span style="width: 0%;"></span></div><small>0 tablets</small></div></div>
+        <div class="log"><span data-rx-bind-text="log">writes arriving…</span></div>
+    </tablet-split></div>
+        </div>
+            </div>
+        </section>
+    </story-section>
+
+        <story-section toc-section="queries" toc-anchor="queries" eyebrow="05 · what you get" heading="Partial keys become range reads." data-rx-host="" data-ssg-id="8" style="--toc-depth: 0; scroll-margin-top: 80px;">
+        <section>
+            <div class="text" motion-reveal="" style="opacity: 0;">
+                <span class="eyebrow"><span data-rx-bind-text="eyebrow">05 · what you get</span></span>
+                <h2><span data-rx-bind-text="heading">Partial keys become range reads.</span></h2>
+                <div class="body">
+            <p>Queries that would need secondary indexes become efficient range reads, routed to a
+               bounded set of nodes and cores. The query model gets substantially more expressive,
+               with no sacrifice in distribution or performance.</p>
+            <div class="grid">
+                <div class="feat" motion-reveal="0" style="opacity: 0;">
+                    <h4>Prefix scans</h4>
+                    <p>Name the start of a partition key, get every partition under it as one
+                       contiguous range, in key order.</p>
+                    <code>WHERE coll = 'collection'</code>
+                </div>
+                <div class="feat" motion-reveal="0.08" style="opacity: 0;">
+                    <h4>Ranges on the last component</h4>
+                    <p>Page through a collection, or take a range of collections, with no
+                       full-cluster scatter.</p>
+                    <code>AND docid &gt; 'd100' LIMIT 2</code>
+                </div>
+                <div class="feat" motion-reveal="0.16" style="opacity: 0;">
+                    <h4>IN, then a range</h4>
+                    <p>Several prefixes at once, each ending in a range: one bounded read per prefix.</p>
+                    <code>colid IN ('c1','c42') AND docid &gt; 'd1'</code>
+                </div>
+                <div class="feat" motion-reveal="0.24" style="opacity: 0;">
+                    <h4>LIMIT means first</h4>
+                    <p>A LIMIT on a full scan returns the first keys of the table, in order.</p>
+                    <code>SELECT * FROM docs LIMIT 2</code>
+                </div>
+                <div class="feat" motion-reveal="0.32" style="opacity: 0;">
+                    <h4>Simpler data models</h4>
+                    <p>For range-ordered access patterns, secondary indexes and denormalized
+                       tables become unnecessary. One table, keyed by path.</p>
+                    <code>PRIMARY KEY ((coll, colid, docid))</code>
+                </div>
+                <div class="feat" motion-reveal="0.4" style="opacity: 0;">
+                    <h4>Routed by the drivers</h4>
+                    <p>The Python and Rust drivers compute Lexis tokens on the client and send each
+                       query to the node and shard that own it.</p>
+                    <code>token() → blob</code>
+                </div>
+            </div>
+            <button class="more" data-rx-bind-on-click="^toExamples">See every query, with results →</button>
+        </div>
+            </div>
+        </section>
+    </story-section>
+
+        <story-section toc-section="prior-art" toc-anchor="prior-art" eyebrow="06 · prior art" heading="Bigtable's query model on modern hardware." data-rx-host="" data-ssg-id="9" style="--toc-depth: 0; scroll-margin-top: 80px;">
+        <section>
+            <div class="text" motion-reveal="" style="opacity: 0;">
+                <span class="eyebrow"><span data-rx-bind-text="eyebrow">06 · prior art</span></span>
+                <h2><span data-rx-bind-text="heading">Bigtable's query model on modern hardware.</span></h2>
+                <div class="body">
+            <p>Lexicographic order, per-table tablets and dynamic splitting are the model Google
+               Bigtable has offered since 2004. Lexis brings it to a per-core, shared-nothing
+               architecture, where a tablet split moves work to a specific core on a specific node:
+               a finer granularity of load balancing than anything else available.</p>
+            <p>Together they make something new in open source distributed databases:
+               <strong>Bigtable's query model on modern hardware.</strong></p>
+        </div>
+            </div>
+        </section>
+    </story-section>
+
+        <section class="final" motion-reveal="" style="opacity: 0;">
+            <h2>Try it on one node.</h2>
+            <div class="cmd"><span class="p">$</span> docker run --name lexisdb -d 0x6a6f6e6e79/lexisdb</div>
+            <div class="buttons">
+                <button class="primary" data-rx-bind-on-click="toInstall">Installation guide</button>
+                <button class="ghost" data-rx-bind-on-click="toExamples">Examples</button>
+            </div>
+        </section>
+
+        <site-footer data-rx-host="">
+        <footer>
+            <div class="brand"><lexis-logo class="mark" data-rx-host="">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="210 111 835 1024" role="img" aria-label="Lexis">
+            <path class="hex" stroke-width="30" stroke-linejoin="round" d="M 671.9,172.3 L 965.1,343.7 Q 1010,370 1010.0,422.0 L 1010.0,828.0 Q 1010,880 964.9,905.9 L 672.1,1074.1 Q 627,1100 581.9,1074.0 L 290.1,906.0 Q 245,880 245.0,828.0 L 245.0,422.0 Q 245,370 289.9,343.7 L 582.1,172.3 Q 627,146 671.9,172.3 Z"></path>
+            <g class="shape">
+                <rect x="380" y="362" width="155" height="128" rx="6"></rect>
+                <rect x="380" y="505" width="155" height="128" rx="6"></rect>
+                <rect x="380" y="648" width="155" height="125" rx="6"></rect>
+                <rect x="380" y="787" width="155" height="123" rx="6"></rect>
+                <line x1="590" y1="332" x2="590" y2="903" stroke-width="18" stroke-linecap="round"></line>
+                <polygon points="619,399 846,399 886,459 846,519 619,519" stroke-width="8" stroke-linejoin="round"></polygon>
+                <polygon points="619,556 879,556 921,621 879,686 619,686" stroke-width="8" stroke-linejoin="round"></polygon>
+                <polygon points="619,722 879,722 921,785 879,848 619,848" stroke-width="8" stroke-linejoin="round"></polygon>
+            </g>
+            <g class="labels">
+                <text x="458" y="452">00</text>
+                <text x="458" y="595">7F</text>
+                <text x="458" y="736">80</text>
+                <text x="458" y="873">FF</text>
+            </g>
+        </svg>
+    </lexis-logo><span>Lexis</span></div>
+            <div class="cols">
+                <div>
+                    <h5>Project</h5>
+                    <a href="https://github.com/jk89/lexisdb" target="_blank" rel="noopener">lexisdb</a>
+                    <a href="https://github.com/jk89/lexis-cqlsh" target="_blank" rel="noopener">lexis-cqlsh</a>
+                    <a href="https://github.com/jk89/lexis-tools-java" target="_blank" rel="noopener">lexis-tools-java</a>
+                    <a href="https://github.com/jk89/lexis-jmx" target="_blank" rel="noopener">lexis-jmx</a>
+                </div>
+                <div>
+                    <h5>Drivers</h5>
+                    <a href="https://github.com/jk89/lexis-python-driver" target="_blank" rel="noopener">Python</a>
+                    <a href="https://github.com/jk89/lexis-rust-driver" target="_blank" rel="noopener">Rust</a>
+                </div>
+                <div>
+                    <h5>Upstream</h5>
+                    <a href="https://opensource.docs.scylladb.com/branch-6.2/" target="_blank" rel="noopener">ScyllaDB 6.2 docs</a>
+                    <a href="https://github.com/scylladb/scylladb/tree/scylla-6.2.3" target="_blank" rel="noopener">scylla-6.2.3</a>
+                </div>
+            </div>
+            <p class="legal">Lexis 1.0 is forked from ScyllaDB 6.2.3 and licensed AGPL-3.0-or-later.</p>
+        </footer>
+    </site-footer>
+    </home-page></rx-router-outlet>
+    </app-root></body></html>
