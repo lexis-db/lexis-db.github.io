@@ -14,11 +14,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&amp;family=Ubuntu+Mono:wght@400;700&amp;display=swap">
     <style>html, body { margin: 0; background: #1f0a24; }</style>
-  <script type="module" crossorigin="" src="/assets/index-JGdVyDLa.js"></script>
+  <script type="module" crossorigin="" src="/assets/index-D9kT2exi.js"></script>
   <link rel="modulepreload" crossorigin="" href="/assets/blob-CbDcr2Fw.js">
   <link rel="modulepreload" crossorigin="" href="/assets/toc-menu-items.service-ow5GF49n.js">
   <link rel="modulepreload" crossorigin="" href="/assets/toc-menu.service-x3NBinY3.js">
-<link rel="modulepreload" as="script" crossorigin="" href="/assets/home-page-BWiS10ba.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/site-footer.component-Dp1VJbIN.js"><style id="yaw-ssg-styles">lexis-logo { display: inline-block; line-height: 0; }
+<link rel="modulepreload" as="script" crossorigin="" href="/assets/home-page-Br3x9hjy.js"><link rel="modulepreload" as="script" crossorigin="" href="/assets/site-footer.component-Dp1VJbIN.js"><style id="yaw-ssg-styles">lexis-logo { display: inline-block; line-height: 0; }
 lexis-logo svg { width: 100%; height: auto; display: block; }
 lexis-logo .hex { fill: rgb(19, 6, 26); stroke: rgb(19, 6, 26); }
 lexis-logo .shape > * { fill: rgb(54, 26, 64); stroke: rgb(54, 26, 64); }
@@ -156,6 +156,9 @@ partition-viz .chip.tone-2 i { background: var(--lilac); }
 partition-viz .chip.dim { opacity: 0.32; }
 partition-viz .chip.hit { border-color: rgba(212, 176, 230, 0.85); color: var(--white); background: linear-gradient(rgba(212, 176, 230, 0.28), rgba(212, 176, 230, 0.12)); box-shadow: rgba(212, 176, 230, 0.8) 0px 6px 24px -8px; }
 partition-viz .verdict { margin-top: 1.25rem; display: flex; align-items: center; gap: 0.7rem; font-size: 0.98rem; color: var(--secondary); min-height: 1.6rem; }
+partition-viz .verdict > .texts { display: grid; }
+partition-viz .texts > span { grid-area: 1 / 1; align-self: center; visibility: hidden; }
+partition-viz .texts > span.on { visibility: visible; }
 partition-viz .verdict .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); flex: 0 0 auto; transition: background 0.3s, box-shadow 0.3s; }
 partition-viz .verdict.bad .dot { background: var(--steel); box-shadow: 0 0 12px var(--steel); }
 @media (max-width: 720px) {
@@ -406,7 +409,7 @@ home-page .buttons > .ghost:hover { border-color: var(--accent); }</style><scrip
             </div>
         </div>
         <div class="verdict bad" data-rx-bind-class-bad="isMode('murmur')">
-            <span class="dot"></span><span><span data-rx-bind-text="verdict">Hashed by the whole key: 3 matches spread over 3 of 3 nodes.</span></span>
+            <span class="dot"></span><span class="texts" rx-for="v of verdicts by id"><span data-rx-bind-class-on="v.on" data-rx-item="" data-rx-key="murmur-0" class="on"><span data-rx-bind-text="v.text">Hashed by the whole key: 3 matches spread over 3 of 3 nodes.</span></span><span data-rx-bind-class-on="v.on" data-rx-item="" data-rx-key="murmur-1"><span data-rx-bind-text="v.text">Hashed by the whole key: 4 matches spread over 3 of 3 nodes.</span></span><span data-rx-bind-class-on="v.on" data-rx-item="" data-rx-key="murmur-2"><span data-rx-bind-text="v.text">Hashed by the whole key: 3 matches spread over 3 of 3 nodes.</span></span><span data-rx-bind-class-on="v.on" data-rx-item="" data-rx-key="lexis-0"><span data-rx-bind-text="v.text">Ordered by key: 3 matches in one contiguous range, 2 adjacent tablets, read in key order.</span></span><span data-rx-bind-class-on="v.on" data-rx-item="" data-rx-key="lexis-1"><span data-rx-bind-text="v.text">Ordered by key: 4 matches in one contiguous range, 3 adjacent tablets, read in key order.</span></span><span data-rx-bind-class-on="v.on" data-rx-item="" data-rx-key="lexis-2"><span data-rx-bind-text="v.text">Ordered by key: 3 matches in one contiguous range, 2 adjacent tablets, read in key order.</span></span></span>
         </div>
     </partition-viz></div>
         </div>
